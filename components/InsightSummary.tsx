@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { KeywordHit, Review } from "@/lib/types";
 import type { Sentiment } from "@/lib/sentiment";
 import { extractBigrams, extractKeywords } from "@/lib/keywords";
@@ -32,7 +32,7 @@ const VARIANT = {
   },
 } as const;
 
-const MAX_THEMES = 4;
+const DEFAULT_THEME_LIMIT = 4;
 const MAX_EXAMPLES_PER_THEME = 2;
 const EXAMPLE_MAX_CHARS = 220;
 
@@ -58,8 +58,10 @@ export function InsightSummary({
     };
   }, [polarityReviews]);
 
-  // Pick themes: prefer phrases (more informative), top up with keywords if needed.
-  const uniqueThemes = useMemo(() => {
+  const [showAll, setShowAll] = useState(false);
+
+  // All deduped themes (phrases first, then unigram keywords).
+  const allThemes = useMemo(() => {
     const seen = new Set<string>();
     const out: KeywordHit[] = [];
     for (const t of [...phrases, ...keywords]) {
@@ -67,27 +69,33 @@ export function InsightSummary({
       if (seen.has(k)) continue;
       seen.add(k);
       out.push(t);
-      if (out.length >= MAX_THEMES) break;
     }
     return out;
   }, [phrases, keywords]);
 
+  const visibleThemes = showAll
+    ? allThemes
+    : allThemes.slice(0, DEFAULT_THEME_LIMIT);
+
   const themeExamples = useMemo(
     () =>
-      uniqueThemes.map((t) => ({
+      visibleThemes.map((t) => ({
         theme: t,
         examples: findExamples(polarityReviews, t.word, variant),
       })),
-    [uniqueThemes, polarityReviews, variant]
+    [visibleThemes, polarityReviews, variant]
   );
 
+  // Summary sentence is always built from the top-N (constant) so it doesn't
+  // bloat when "Show all" is on.
   const summarySentence = buildSummarySentence(
-    uniqueThemes,
+    allThemes.slice(0, DEFAULT_THEME_LIMIT),
     v.headline,
     v.summaryEmpty
   );
 
-  const hasContent = uniqueThemes.length > 0;
+  const hasContent = allThemes.length > 0;
+  const hasMoreThemes = allThemes.length > DEFAULT_THEME_LIMIT;
 
   return (
     <section className="flex h-full max-h-[40rem] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-card sm:p-6">
@@ -157,6 +165,29 @@ export function InsightSummary({
               ))}
             </ul>
           </div>
+
+          {hasMoreThemes && (
+            <div className="mt-3 flex shrink-0 justify-center border-t border-slate-100 pt-3">
+              <button
+                type="button"
+                onClick={() => setShowAll((s) => !s)}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-semibold transition hover:bg-slate-50 ${v.accent}`}
+              >
+                {showAll ? (
+                  <>
+                    Show fewer
+                    <ChevronUpIcon />
+                  </>
+                ) : (
+                  <>
+                    Show all themes ({allThemes.length - DEFAULT_THEME_LIMIT}{" "}
+                    more)
+                    <ChevronDownIcon />
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </section>
@@ -267,6 +298,38 @@ function ThumbDownIcon() {
     >
       <path d="M17 14V3" />
       <path d="M10 20l1-6H5a2 2 0 0 1-2-2.3l1.4-7a2 2 0 0 1 2-1.7h10v11l-4 7a2 2 0 0 1-3-1Z" />
+    </svg>
+  );
+}
+function ChevronDownIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-3 w-3"
+      aria-hidden
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+function ChevronUpIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-3 w-3"
+      aria-hidden
+    >
+      <path d="m18 15-6-6-6 6" />
     </svg>
   );
 }
