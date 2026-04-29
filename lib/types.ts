@@ -50,9 +50,5 @@ export interface ReviewsResponse {
     neutral: number;
     negative: number;
   };
-  insights: {
-    positive: InsightSet;
-    negative: InsightSet;
-  };
   reviews: Review[];
 }

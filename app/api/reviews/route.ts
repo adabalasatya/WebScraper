@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import gplay from "google-play-scraper";
 import { extractAppId } from "@/lib/extractAppId";
 import { classifySentiment, summarizeSentiments } from "@/lib/sentiment";
-import { extractKeywords, extractBigrams } from "@/lib/keywords";
 import type {
   AppInfo,
   RatingDistribution,
@@ -174,13 +173,6 @@ function buildPayload(
   histogram: Record<string, number> | null
 ): ReviewsResponse {
   const stats = summarizeSentiments(reviews);
-  const positiveTexts = reviews
-    .filter((r) => r.sentiment === "positive")
-    .map((r) => r.text);
-  const negativeTexts = reviews
-    .filter((r) => r.sentiment === "negative")
-    .map((r) => r.text);
-
   return {
     appId,
     fetchedAt: new Date().toISOString(),
@@ -188,16 +180,6 @@ function buildPayload(
     appInfo,
     ratingDistribution: buildDistribution(histogram, reviews),
     stats,
-    insights: {
-      positive: {
-        keywords: extractKeywords(positiveTexts),
-        phrases: extractBigrams(positiveTexts),
-      },
-      negative: {
-        keywords: extractKeywords(negativeTexts),
-        phrases: extractBigrams(negativeTexts),
-      },
-    },
     reviews,
   };
 }

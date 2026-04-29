@@ -6,7 +6,7 @@ import { StatsSummary } from "@/components/StatsSummary";
 import { ReviewCard } from "@/components/ReviewCard";
 import { AppInfoCard } from "@/components/AppInfoCard";
 import { RatingDistribution } from "@/components/RatingDistribution";
-import { InsightPanel } from "@/components/InsightPanel";
+import { InsightSummary } from "@/components/InsightSummary";
 import type { ReviewsResponse } from "@/lib/types";
 import type { Sentiment } from "@/lib/sentiment";
 
@@ -324,25 +324,21 @@ export default function HomePage() {
                   What users say
                 </h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  Side-by-side phrase &amp; keyword analysis from the latest
-                  reviews — use the left column to find features to match,
-                  and the right column to spot gaps your app can win on.
+                  A plain-language read of the recurring themes — each backed
+                  by example reviews so you see the actual context, not just
+                  word frequencies.
                 </p>
               </div>
               <div className="grid gap-4 lg:grid-cols-2">
-                <InsightPanel
+                <InsightSummary
                   variant="positive"
                   title="What users love (Strengths)"
-                  subtitle="Signals worth replicating in your own app."
-                  insight={data.insights.positive}
-                  reviewCount={data.stats.positive}
+                  allReviews={data.reviews}
                 />
-                <InsightPanel
+                <InsightSummary
                   variant="negative"
                   title="What users hate (Weaknesses)"
-                  subtitle="Pain points your app can solve better."
-                  insight={data.insights.negative}
-                  reviewCount={data.stats.negative}
+                  allReviews={data.reviews}
                 />
               </div>
             </section>
