@@ -7,6 +7,7 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { AppInfoCard } from "@/components/AppInfoCard";
 import { RatingDistribution } from "@/components/RatingDistribution";
 import { InsightSummary } from "@/components/InsightSummary";
+import { KeywordSection } from "@/components/KeywordSection";
 import type { ReviewsResponse } from "@/lib/types";
 import type { Sentiment } from "@/lib/sentiment";
 
@@ -342,6 +343,9 @@ export default function HomePage() {
                 />
               </div>
             </section>
+
+            {/* Keyword breakdown (separate section, outside the summary cards) */}
+            <KeywordSection allReviews={data.reviews} />
 
             {/* Reviews */}
             <section>
