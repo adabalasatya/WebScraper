@@ -8,6 +8,7 @@ import { AppInfoCard } from "@/components/AppInfoCard";
 import { RatingDistribution } from "@/components/RatingDistribution";
 import { InsightSummary } from "@/components/InsightSummary";
 import { KeywordSection } from "@/components/KeywordSection";
+import { AiInsightPanel } from "@/components/AiInsightPanel";
 import type { ReviewsResponse } from "@/lib/types";
 import type { Sentiment } from "@/lib/sentiment";
 
@@ -343,6 +344,9 @@ export default function HomePage() {
                 />
               </div>
             </section>
+
+            {/* AI insight (Groq → Gemini fallback) */}
+            <AiInsightPanel allReviews={data.reviews} />
 
             {/* Keyword breakdown (separate section, outside the summary cards) */}
             <KeywordSection allReviews={data.reviews} />
